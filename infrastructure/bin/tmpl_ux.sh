@@ -55,9 +55,31 @@ cleanup() { for f in $trap_files; do [ -n "$f" ] && rm -f -- "$f" 2>/dev/null ||
 trap 'cleanup' EXIT INT TERM
 
 # replaced mktemp usage with portable unique-file creation
+# Helper to find writable temp dir (iOS/a-shell compatible)
+get_safe_tmpdir() {
+  local script_dir="$(dirname "$0")"
+  local local_tmp="$script_dir/../tmp"
+  
+  if [ -n "${TMPDIR:-}" ] && [ -d "$TMPDIR" ] && [ -w "$TMPDIR" ]; then
+    echo "$TMPDIR"
+  elif [ -d "$local_tmp" ] && [ -w "$local_tmp" ]; then
+    echo "$local_tmp"
+  else
+    # Try to create local tmp
+    mkdir -p "$local_tmp" 2>/dev/null
+    if [ -d "$local_tmp" ] && [ -w "$local_tmp" ]; then
+      echo "$local_tmp"
+    elif [ -w "/tmp" ]; then
+      echo "/tmp"
+    else
+      echo "."
+    fi
+  fi
+}
+
 ensure_tmp_varsfile() {
   if [ -z "$TMP_VARS" ]; then
-    TMPDIR="${TMPDIR:-/tmp}"
+    TMPDIR="$(get_safe_tmpdir)"
     TMP_VARS="$TMPDIR/tmplux.vars.$$"
     n=0
     while [ -e "$TMP_VARS" ]; do
@@ -195,7 +217,7 @@ fi
 # if we created tmp vars and user supplied a -e, merge (user file first so CLI overrides)
 if [ -n "$TMP_VARS" ] && [ -n "$USER_VARS_FILE" ]; then
   # replaced mktemp with portable unique-file creation for MERGED
-  TMPDIR="${TMPDIR:-/tmp}"
+  TMPDIR="$(get_safe_tmpdir)"
   MERGED="$TMPDIR/tmplux.vars.merged.$$"
   k=0
   while [ -e "$MERGED" ]; do

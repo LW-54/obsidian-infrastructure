@@ -67,7 +67,28 @@ done
 
 # create runner script that uses an unquoted heredoc so expansions happen in the child shell
 # REPLACED mktemp with portable unique-filename logic (avoid mktemp on a-Shell extension)
-TMPDIR="${TMPDIR:-/tmp}"
+# Find writable temp directory (iOS/a-shell doesn't have /tmp)
+# First try user-provided TMPDIR, then a local tmp folder in infrastructure, then fallback
+SCRIPT_DIR="$(dirname "$0")"
+LOCAL_TMP="$SCRIPT_DIR/../tmp"
+
+if [ -n "${TMPDIR:-}" ] && [ -d "$TMPDIR" ] && [ -w "$TMPDIR" ]; then
+  : # use existing valid TMPDIR
+elif [ -d "$LOCAL_TMP" ] && [ -w "$LOCAL_TMP" ]; then
+  TMPDIR="$LOCAL_TMP"
+else
+  # Try to create local tmp if it doesn't exist
+  mkdir -p "$LOCAL_TMP" 2>/dev/null
+  if [ -d "$LOCAL_TMP" ] && [ -w "$LOCAL_TMP" ]; then
+    TMPDIR="$LOCAL_TMP"
+  elif [ -w "/tmp" ]; then
+    TMPDIR="/tmp"
+  else
+    # Last resort: current directory
+    TMPDIR="."
+  fi
+fi
+
 RUNNER="$TMPDIR/tmpl.run.$$"
 n=0
 while [ -e "$RUNNER" ]; do
