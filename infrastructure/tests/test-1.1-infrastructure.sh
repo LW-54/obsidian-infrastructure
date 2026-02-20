@@ -10,7 +10,7 @@
 
 # Determine base directory of the script
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-TARGET_SCRIPT="$SCRIPT_DIR/../scripts/stage.sh"
+TARGET_SCRIPT="$SCRIPT_DIR/../bin/stage.sh"
 
 # Setup isolated test vault
 TEST_VAULT="test_vault_1.1"
@@ -20,7 +20,7 @@ export VAULT_ROOT="$TEST_VAULT"
 
 TEST_LOG_DIR="$TEST_VAULT/99-SYSTEM/logs"
 TEST_LOG_FILE="$TEST_LOG_DIR/staging_logs.md"
-CONFIG_DIR="$TEST_VAULT/99-SYSTEM/infrastructure"
+CONFIG_DIR="$TEST_VAULT/infrastructure/config"
 CONFIG_FILE="$CONFIG_DIR/staging-workflow.md"
 
 # ------------------------------------------------------------------------------

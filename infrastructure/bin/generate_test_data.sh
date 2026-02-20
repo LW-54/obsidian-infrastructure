@@ -47,12 +47,12 @@ create_directories() {
     mkdir -p "$TARGET_DIR/02-REFACTORING"
     mkdir -p "$TARGET_DIR/03-ZETTELKASTEN/Ideas"
     mkdir -p "$TARGET_DIR/03-ZETTELKASTEN/Notes"
-    mkdir -p "$TARGET_DIR/99-SYSTEM/infrastructure"
+    mkdir -p "$TARGET_DIR/infrastructure/config"
 }
 
 # Generate config file
 create_config() {
-    config_file="$TARGET_DIR/99-SYSTEM/infrastructure/staging-workflow.md"
+    config_file="$TARGET_DIR/infrastructure/config/staging-workflow.md"
     printf "INFO: Generating config at '%s'..\n" "$config_file"
     
     cat <<'EOF' > "$config_file"
@@ -65,13 +65,13 @@ This file contains the rules for processing staged notes.
   "Idea": {
     "destination": "03-ZETTELKASTEN/Ideas",
     "fields": {
-      "Topic": ""
+      "topic": ""
     }
   },
   "Note": {
     "destination": "03-ZETTELKASTEN/Notes",
     "fields": {
-      "Status": "[ \"$Status\" = \"Active\" ]"
+      "status": "[ \"$status\" = \"Active\" ]"
     }
   }
 }
@@ -87,8 +87,8 @@ create_notes() {
     cat <<EOF > "$staging_dir/valid-idea.md"
 ---
 Type: Idea
-ID: 20260119001
-Topic: Automation
+id: 20260119001
+topic: Automation
 ---
 # Valid Idea
 This is a valid idea note.
@@ -98,8 +98,8 @@ EOF
     cat <<EOF > "$staging_dir/valid-note.md"
 ---
 Type: Note
-ID: 20260119002
-Status: Active
+id: 20260119002
+status: Active
 ---
 # Valid Note
 This is a valid status note.
@@ -108,8 +108,8 @@ EOF
     # 3. Missing Type
     cat <<EOF > "$staging_dir/missing-type.md"
 ---
-ID: 20260119003
-Topic: Lost
+id: 20260119003
+topic: Lost
 ---
 # Missing Type
 This note has no Type field.
@@ -119,7 +119,7 @@ EOF
     cat <<EOF > "$staging_dir/bad-frontmatter.md"
 ---
 Type: Idea
-ID: 20260119004
+id: 20260119004
 # Bad Frontmatter
 No closing dashes here.
 EOF
@@ -128,8 +128,8 @@ EOF
     cat <<EOF > "$staging_dir/collision-test.md"
 ---
 Type: Idea
-ID: 20260119005
-Topic: Collision
+id: 20260119005
+topic: Collision
 ---
 # Collision Source
 This should collide.
@@ -140,8 +140,8 @@ EOF
     cat <<EOF > "$TARGET_DIR/03-ZETTELKASTEN/Ideas/collision-test.md"
 ---
 Type: Idea
-ID: 20260119000
-Topic: Original
+id: 20260119000
+topic: Original
 ---
 # Original Note
 I was here first.

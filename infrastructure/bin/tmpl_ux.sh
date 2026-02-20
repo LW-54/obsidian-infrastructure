@@ -4,10 +4,14 @@
 # Default template: ST-default.md (looked up in TEMPLATE_DIR)
 set -eu
 
+# Prevent environment variable leakage from persistent shells (e.g. a-shell loops)
+# Users must pass these values explicitly via KEY=VALUE or -e file
+unset BODY TAGS STATUS RELATED PROJECT TOPIC DO_DATE DUE_DATE IMAGE ALIASES || true
+
 # locations (adjust if you want)
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd -P)
 VAULT_ROOT=$(cd "$SCRIPT_DIR/../../.." && pwd -P)
-TEMPLATE_DIR="${TEMPLATE_DIR:-$SCRIPT_DIR/../script_templates}"
+TEMPLATE_DIR="${TEMPLATE_DIR:-$SCRIPT_DIR/../templates}"
 DEFAULT_TEMPLATE="${DEFAULT_TEMPLATE:-ST-default.md}"
 TEMPLATE_FILE=""
 INBOX_DIR="${INBOX_DIR:-$VAULT_ROOT/00-INBOX}"
@@ -33,6 +37,7 @@ USAGE
 if [ $# -lt 1 ]; then usage; fi
 
 NAME="$1"; shift
+NAME="${NAME%_}"  # remove trailing underscore (bug fix)
 
 case "$NAME" in
   *.md) OUTFILE="$INBOX_DIR/$NAME" ;;
@@ -219,4 +224,4 @@ set -- "$@" -o "$OUTFILE" "$TEMPLATE_FILE"
 echo "Creating: $OUTFILE"
 echo "Using template: $TEMPLATE_FILE"
 
-exec sh "$@"
+exec env -i PATH="$PATH" HOME="$HOME" sh "$@"

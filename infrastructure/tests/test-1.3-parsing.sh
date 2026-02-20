@@ -6,11 +6,11 @@
 VAULT_ROOT="test_vault_1.3"
 rm -rf "$VAULT_ROOT"
 mkdir -p "$VAULT_ROOT/01-STAGING"
-mkdir -p "$VAULT_ROOT/99-SYSTEM/infrastructure"
+mkdir -p "$VAULT_ROOT/infrastructure/config"
 mkdir -p "$VAULT_ROOT/99-SYSTEM/logs"
 
 # Create config
-cat <<'EOF' > "$VAULT_ROOT/99-SYSTEM/infrastructure/staging-workflow.md"
+cat <<'EOF' > "$VAULT_ROOT/infrastructure/config/staging-workflow.md"
 # Config
 ```json
 {
@@ -28,7 +28,7 @@ EOF
 cat <<'EOF' > "$VAULT_ROOT/01-STAGING/valid-idea.md"
 ---
 Type: Idea
-ID: 1001
+id: 1001
 ---
 Body
 EOF
@@ -36,14 +36,14 @@ EOF
 cat <<'EOF' > "$VAULT_ROOT/01-STAGING/valid-note.md"
 ---
 Type: Note
-ID: 1002
+id: 1002
 ---
 Body
 EOF
 
 cat <<'EOF' > "$VAULT_ROOT/01-STAGING/missing-type.md"
 ---
-ID: 123
+id: 123
 ---
 Body
 EOF
@@ -56,7 +56,7 @@ EOF
 
 # Run stage.sh
 export VAULT_ROOT
-sh scripts/stage.sh > /dev/null
+sh infrastructure/bin/stage.sh > /dev/null
 
 # Verify logs
 LOG_FILE="$VAULT_ROOT/99-SYSTEM/logs/staging_logs.md"

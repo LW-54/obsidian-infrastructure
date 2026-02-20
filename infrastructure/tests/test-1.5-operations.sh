@@ -8,21 +8,21 @@ rm -rf "$VAULT_ROOT"
 mkdir -p "$VAULT_ROOT"
 
 # Use generate_test_data.sh to seed
-sh scripts/generate_test_data.sh --target "$VAULT_ROOT"
+sh infrastructure/bin/generate_test_data.sh --target "$VAULT_ROOT"
 
 # Add custom test cases
 # 1. Invalid note for Error Injection
 cat <<EOF > "$VAULT_ROOT/01-STAGING/missing-id.md"
 ---
 Type: Idea
-Topic: No ID
+topic: No id
 ---
 Content
 EOF
 
 # Run stage.sh
 export VAULT_ROOT
-sh scripts/stage.sh > /dev/null
+sh infrastructure/bin/stage.sh > /dev/null
 
 # Verify Results
 
@@ -66,7 +66,7 @@ check_content "$VAULT_ROOT/02-REFACTORING/collision-test.md" "> [!WARNING] Stagi
 
 # 3. Invalid Note (missing-id.md moves to REFACTORING with error)
 check_file "$VAULT_ROOT/02-REFACTORING/missing-id.md" "Invalid file"
-check_content "$VAULT_ROOT/02-REFACTORING/missing-id.md" "> [!WARNING] Staging Failed: Missing mandatory field: ID" "Missing ID Warning"
+check_content "$VAULT_ROOT/02-REFACTORING/missing-id.md" "> [!WARNING] Staging Failed: Missing mandatory field: id" "Missing id Warning"
 
 # 4. Missing Type (moves to REFACTORING)
 check_file "$VAULT_ROOT/02-REFACTORING/missing-type.md" "Missing Type file"

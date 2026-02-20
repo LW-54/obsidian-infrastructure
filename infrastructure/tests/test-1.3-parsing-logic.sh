@@ -5,10 +5,10 @@
 # 1. Setup Mock Environment
 TEST_DIR="test_vault_1.3"
 mkdir -p "$TEST_DIR/01-STAGING"
-mkdir -p "$TEST_DIR/99-SYSTEM/infrastructure"
+mkdir -p "$TEST_DIR/infrastructure/config"
 mkdir -p "$TEST_DIR/99-SYSTEM/logs"
 
-cat <<'EOF' > "$TEST_DIR/99-SYSTEM/infrastructure/staging-workflow.md"
+cat <<'EOF' > "$TEST_DIR/infrastructure/config/staging-workflow.md"
 # Config
 ```json
 {
@@ -33,7 +33,7 @@ EOF
 # Since stage.sh calls main at the end, we might need to modify it or use a trick.
 
 # Trick: Copy stage.sh and remove the main call
-cp scripts/stage.sh stage_lib.sh
+cp infrastructure/bin/stage.sh stage_lib.sh
 sed -i '$d' stage_lib.sh # Remove main "$@"
 
 . ./stage_lib.sh

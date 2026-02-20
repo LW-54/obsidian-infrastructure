@@ -1,203 +1,318 @@
-# Brownfield Enhancement PRD
+---
+stepsCompleted:
+  - step-01-init
+  - step-02-discovery
+  - step-02b-vision
+  - step-02c-executive-summary
+  - step-03-success
+  - step-04-journeys
+  - step-05-domain
+  - step-06-innovation
+  - step-07-project-type
+  - step-08-scoping
+  - step-09-functional
+  - step-10-nonfunctional
+  - step-11-polish
+  - step-12-complete
+workflowStatus: complete
+inputDocuments:
+  - docs/implementation_brief.md
+  - docs/refactor_todo.md
+  - docs/project-overview.md
+  - docs/architecture.md
+  - docs/technology_stack.md
+  - docs/development_guide.md
+  - docs/component_inventory.md
+  - docs/source_tree_analysis.md
+  - docs/conditional_analysis_deep.md
+  - docs/enhancement-plan.md
+  - docs/existing_documentation_inventory.md
+  - docs/project_structure.md
+workflowType: prd
+documentCounts:
+  briefCount: 1
+  researchCount: 0
+  brainstormingCount: 0
+  projectDocsCount: 12
+classification:
+  projectType: CLI Tool
+  domain: General
+  complexity: Low
+  projectContext: Brownfield
+---
 
-## Intro Project Analysis and Context
+# Product Requirements Document - obsidian-scripts
 
-### Existing Project Overview
+**Author:** Lw
+**Date:** 2026-02-20
 
-#### Analysis Source
-- Document-project analysis available - using existing technical documentation
-- Expert Interview regarding Staging Logic and Constraints
+## Executive Summary
 
-#### Current Project State
-The project is a `home-manager` configuration for a development environment (Linux/WSL). The immediate focus is on **Obsidian Staging Automation**, a specific workflow to manage the user's "Second Brain". Currently, this relies on manual file moves, which is error-prone and inefficient, especially on mobile devices.
+This project refactors the existing Obsidian infrastructure automation system from an ad-hoc collection of scripts into a robust, testable foundation. The current system—comprising `tmpl.sh`, `tmpl_ux.sh`, `task.sh`, and `stage.sh`—suffers from bugs (environment variable leakage, filename sanitization issues), inconsistent directory structure, and manual configuration management. This refactor migrates the codebase to a clean `infrastructure/` layout with standardized paths, fixes critical bugs using environment isolation and defensive sanitization, and replaces the legacy `type_to_folder.md` configuration with a JSON-based `staging-workflow.md` format. The outcome is a POSIX-compliant shell toolset that runs reliably across Linux/WSL and iOS (a-shell), enabling confident iteration and deployment of future Obsidian workflow enhancements.
 
-### Available Documentation Analysis
+### What Makes This Special
 
-#### Available Documentation
-- [x] Tech Stack Documentation (in `docs/brownfield-architecture.md`)
-- [x] Source Tree/Architecture (in `docs/brownfield-architecture.md`)
-- [ ] Coding Standards (Implicit in existing scripts, but specific POSIX sh standards needed)
-- [ ] API Documentation (N/A)
-- [ ] External API Documentation (N/A)
-- [ ] UX/UI Guidelines (N/A - CLI/Script focus)
-- [ ] Technical Debt Documentation (in `docs/brownfield-architecture.md`)
-- [x] Other: `docs/brief.md` (Project Brief for this specific enhancement)
+Unlike one-off script fixes, this refactor prioritizes **testability and structural integrity** as the foundation for ongoing development. By implementing the `env -i` pattern for environment isolation and adding defensive underscore stripping, it eliminates a class of bugs that plague shell scripts running in stateful mobile environments. The directory reorganization (`bin/`, `config/`, `templates/`, `tests/`) creates clear boundaries that make the system comprehensible and extensible. The migration from flat configuration files to embedded JSON within Markdown preserves editability in Obsidian while enabling structured data parsing—bridging the gap between human-readable documentation and machine-readable configuration.
 
-**Note:** Using existing project analysis from `docs/brownfield-architecture.md` and `docs/brief.md`.
+## Project Classification
 
-### Enhancement Scope Definition
+| Attribute | Value |
+|:---|:---|
+| **Project Type** | CLI Tool |
+| **Domain** | General (Personal Productivity) |
+| **Complexity** | Low |
+| **Project Context** | Brownfield Refactor |
 
-#### Enhancement Type
-- [x] New Feature Addition
-- [ ] Major Feature Modification
-- [ ] Integration with New Systems
-- [ ] Performance/Scalability Improvements
-- [ ] UI/UX Overhaul
-- [ ] Technology Stack Upgrade
-- [ ] Bug Fix and Stability Improvements
+## Success Criteria
 
-#### Enhancement Description
-Implement a POSIX-compliant shell script (`stage.sh`) and a corresponding configuration file (`staging-workflow.md`) to automate the processing of Obsidian notes. The system will parse YAML frontmatter, validate fields using configurable shell snippets, and move files from `01-STAGING` to their designated locations in `03-ZETTELKASTEN`, or to `02-REFACTORING` upon failure/collision.
+### User Success
 
-#### Impact Assessment
-- [ ] Minimal Impact (isolated additions)
-- [x] Moderate Impact (some existing code changes - adding new scripts/config to `misc/obsidian`)
-- [ ] Significant Impact (substantial existing code changes)
-- [ ] Major Impact (architectural changes required)
+- **Confidence in Changes:** Developer can modify scripts or add new note types without fear of breaking iOS compatibility, verified by running the test suite and seeing 100% pass rate
+- **Cross-Platform Reliability:** The same command produces identical results on Linux/WSL and iOS (a-shell) without manual workarounds
+- **Clear Debugging:** When a note fails staging, the error callout in `02-REFACTORING/` provides specific, actionable feedback about which validation failed
+- **Mobile Editability:** Configuration changes can be made directly in Obsidian on any device via the JSON-in-Markdown format
 
-### Goals and Background Context
+### Business Success
 
-#### Goals
-- Automate file organization based on YAML frontmatter "Type" and "Fields".
-- Ensure data integrity via validation rules executed as shell snippets (via `eval`).
-- Run fast and reliably on Linux and iOS (`a-shell`) using POSIX `sh` and `jq`.
-- Provide clear feedback for invalid files or naming collisions by moving them to `02-REFACTORING` and injecting an error callout.
-- Maintain a stateless configuration (re-read config on every run) for easy mobile updates.
+- **Foundation for Iteration:** Refactor completes with documented extension points, enabling future enhancements (new note types, validation rules) to be implemented in hours rather than days
+- **Deployment Confidence:** Zero-downtime migration path—old `current_infrastructure/` can be removed only after full test suite passes in new `infrastructure/` location
 
-#### Background Context
-The user needs a robust, cross-platform way to manage their Obsidian vault, ensuring that notes created on mobile or desktop are correctly categorized without manual friction. Manual filing is currently error-prone and tedious. The specific constraint of running on iOS via `a-shell` necessitates strict POSIX `sh` compliance. The "Configuration as Code" approach (embedding JSON in a Markdown note) allows for easy editing of workflow rules directly within Obsidian on any device.
+### Technical Success
 
-### Change Log
+- **All Phases Complete:** Directory restructuring (Phase 1-2), bug fixes (Phase 3), and verification (Phase 4) all marked complete in `refactor_todo.md`
+- **Bug Fixes Verified:** Persistent content bug fixed via `env -i` pattern; underscore sanitization strips trailing underscores from filenames
+- **Configuration Migrated:** `type_to_folder.md` retired; all mappings successfully migrated to `config/staging-workflow.md` in JSON format
+- **Test Coverage:** All integration tests pass: `test-1.1-infrastructure.sh` and related test files execute successfully
+- **POSIX Compliance:** Scripts execute without errors in `a-shell` iOS environment and standard Linux `sh`
 
-| Change | Date | Version | Description | Author |
-| :--- | :--- | :--- | :--- | :--- |
-| Initial Draft | 2026-01-18 | 1.0 | Initial Brownfield PRD for Staging Automation | PM Agent |
+### Measurable Outcomes
 
-## Requirements
+| Metric | Target | Measurement Method |
+|:---|:---|:---|
+| Test Pass Rate | 100% | Run `infrastructure/tests/*.sh` |
+| iOS Compatibility | Zero errors | Execute full workflow in a-shell |
+| Migration Completeness | All mappings migrated | Compare `type_to_folder.md` to `config/staging-workflow.md` |
+| Bug Fix Verification | Fixed issues don't recur | Regression tests for env leakage and underscore handling |
 
-### Functional Requirements
-- **FR1**: The system MUST execute as a POSIX-compliant shell script (`stage.sh`), compatible with both Linux (bash/sh) and iOS (`a-shell`).
-- **FR2**: The system MUST parse a JSON configuration block embedded within `99-SYSTEM/infrastructure/staging-workflow.md` using `jq`.
-- **FR3**: The system MUST iterate through all files in the `01-STAGING` directory.
-- **FR4**: For each file, the system MUST validate the presence of a "Type" field in the YAML frontmatter and match it against the loaded configuration.
-- **FR5**: The system MUST validate required fields defined in the config.
-    - **FR5.1**: If a field definition is an empty string `""`, valid if the field exists and is not empty.
-    - **FR5.2**: If a field definition is a string, it MUST be treated as a shell snippet and executed via `eval` for validation (Return 0 = Pass, Non-zero = Fail).
-- **FR6**: The system MUST enforce a mandatory unique ID check for every note (implicitly or explicitly defined in config) to prevent duplication.
-- **FR7**: **Success Path**: If all validations pass, the system MUST move the file to the configured `destination` folder.
-    - **FR7.1**: If a file with the same name already exists at the destination, the system MUST treat it as a failure (Collision).
-- **FR8**: **Failure Path**: If validation fails OR a name collision occurs:
-    - **FR8.1**: The file MUST be moved to `02-REFACTORING`.
-    - **FR8.2**: An error callout (e.g., `> [!WARNING] Error: ...`) MUST be appended to the file content, immediately following the YAML frontmatter block (line after `---`).
-- **FR9**: The system MUST be stateless, re-reading the configuration file on every execution.
-- **FR10**: **Malformed Data**: If a file lacks valid YAML frontmatter or the frontmatter is unparseable, the system MUST treat it as a validation failure and move it to `02-REFACTORING` with a generic "Invalid Frontmatter" error.
-- **FR11**: **Logging**: The system MUST append a run summary (Timestamp, Files Processed Count, Success Count, Failure Count) to `99-SYSTEM/logs/staging_logs.md`.
+## Product Scope
 
-### Non-Functional Requirements
-- **NFR1**: The script MUST complete execution on a batch of 10 notes in under 2 seconds on an iPhone (a-shell environment).
-- **NFR2**: The script MUST NOT use any non-POSIX shell features (no arrays, no `[[ ]]`, no process substitution `<()`).
+### MVP - Minimum Viable Product
 
-### Compatibility Requirements
-- **CR1**: **Data Integrity**: The script MUST NOT modify the original content of the note *except* to append the error callout in case of failure.
-## Technical Constraints and Integration Requirements
+- Directory structure created (`bin/`, `config/`, `templates/`, `tests/`)
+- All scripts moved and paths updated
+- Configuration migrated to JSON format
+- Persistent content bug fixed (`env -i` implementation)
+- Underscore sanitization implemented
+- Test suite passes
 
-### Existing Technology Stack
-- **Languages**: POSIX `sh` (Strict compliance required for iOS `a-shell`).
-- **Data Processing**: `jq` (Version 1.6+).
-- **OS**: Linux (WSL) and iOS (`a-shell`).
-- **Infrastructure**: Git for version control; iCloud Drive for vault synchronization.
-- **Dependencies**: `jq` must be installed and available in `$PATH`.
+### Growth Features (Post-MVP)
 
-### Integration Approach
-- **File Structure Approach**:
-    - Script: `misc/obsidian/infrastructure/scripts/stage.sh`
-    - Config: `misc/obsidian/infrastructure/staging-workflow.md`
-    - Logs: `misc/obsidian/logs/staging_logs.md` (Symlinked to `99-SYSTEM/logs/staging_logs.md`)
-- **Execution Model**: Manual execution via terminal (`./stage.sh`).
-- **Path Resolution**: Script relies on relative paths from the vault root or explicit `VAULT_ROOT` environment variable.
+- Additional validation rules for note types beyond basic ID check
+- Enhanced logging with structured output
+- Dry-run mode improvements with diff output
+- Support for additional template types
 
-### Code Organization and Standards
-- **Naming Conventions**: `kebab-case` for filenames. `snake_case` for internal script variables and functions.
-- **Coding Standards**:
-    - Strict POSIX `sh` (#!/bin/sh).
-    - All variables must be double-quoted to handle filenames with spaces.
-    - Modular functions (e.g., `validate_file`, `move_file`, `log_event`).
-- **Documentation**: Inline comments explaining complex `sed` or `jq` logic.
+### Vision (Future)
 
-### Deployment and Operations
-- **Testing Strategy**:
-    - **Dry-Run Mode**: The script MUST support a `--dry-run` flag that prints actions (Validation Pass/Fail, Intended Move) to stdout without modifying files.
-    - **Test Bed**: Developer should verify using a temporary directory structure mimicking the vault before deploying to the live vault.
-- **Logging**:
-    - Log location is fixed to `99-SYSTEM/logs/staging_logs.md` for MVP.
-    - Log format: Markdown table or simple appended lines for easy rendering in Obsidian.
+- Plugin architecture for custom validators
+- Automatic backup integration before file moves
+- Cross-vault synchronization capabilities
+- Webhook or notification integration for staging events
 
-### Risk Assessment and Mitigation
-- **Technical Risks**:
-    - **BSD vs GNU `sed`**: `sed -i` behavior differs significantly between Linux (GNU) and macOS/iOS (BSD).
-    - *Mitigation*: Avoid `sed -i`. Use `sed > temp && mv temp file` pattern to ensure cross-platform compatibility.
-    - **`eval` Security**: Executing arbitrary strings from config.
-    - *Mitigation*: Documentation must warn users; Script is local-only (low attack vector).
-- **Integration Risks**:
-    - **`jq` Availability**: User might not have `jq` installed on a new device.
-## Epic and Story Structure
+## User Journeys
 
-### Epic Structure
-- **Epic Approach**: Single Epic structure. The enhancement is a coherent, single-purpose workflow tool. Splitting it would add unnecessary overhead.
+### Journey 1: The Daily Capture (Happy Path)
 
-### Epic 1: Automated Obsidian Staging Workflow
-- **Epic Goal**: Eliminate manual file organization friction by implementing an automated, configurable staging script (`stage.sh`) that acts as a reliable gatekeeper for the Zettelkasten.
-- **Integration Requirements**: Script must integrate with existing vault structure (`01-STAGING`, `02-REFACTORING`, `99-SYSTEM`) and run within the POSIX/sh constraints of `a-shell`.
+**Alex** is out and about when an idea strikes. They trigger an iOS Shortcut that creates a new note in `00-INBOX/` with a timestamp and their quick capture. Later, at their desk, Alex reviews the inbox, sees a note that's ready for the Zettelkasten, and drags it to `01-STAGING/`. They run `./stage.sh` from the terminal. The script validates the note's frontmatter (Type: Ideas, ID present), matches it against `config/staging-workflow.md`, and moves it to `03-ZETTELKASTEN/Ideas/Gifts/`. The note is now properly filed and searchable.
 
-#### Story 1.1: Infrastructure Setup & Logging
-- **As a** Developer,
-- **I want** the basic script structure with logging capabilities and pre-flight checks,
-- **so that** I can debug future development steps and ensure the environment is correct.
-- **Acceptance Criteria**:
-    1. `stage.sh` exists and is executable.
-    2. Script checks for `jq` and exits with error if missing.
-    3. Script can write formatted log entries to `99-SYSTEM/logs/staging_logs.md` (or a mock location).
-    4. `--dry-run` flag is implemented (even if it does nothing yet, the arg parsing works).
+**Emotional Arc:** Capture → Review → Process → Organized
 
-#### Story 1.2: Test Environment Generator
-- **As a** Developer,
-- **I want** a helper script to generate a dummy vault structure with valid and invalid test notes,
-- **so that** I can safely test `stage.sh` without risking my actual data.
-- **Acceptance Criteria**:
-    1. `generate_test_data.sh` created.
-    2. Generates folders: `01-STAGING`, `02-REFACTORING`, `03-ZETTELKASTEN`, `99-SYSTEM`.
-    3. Generates `staging-workflow.md` with known test rules.
-    4. Generates a mix of Valid, Invalid (missing type), and Invalid (bad field) notes in `01-STAGING`.
+**Critical Moment:** Running `stage.sh` and seeing the note move to the correct subfolder without manual path construction.
 
-#### Story 1.3: Core Config Parser & Iteration Loop
-- **As a** Developer,
-- **I want** the script to parse the `staging-workflow.md` JSON and iterate through files,
-- **so that** I can verify the script "sees" the work to be done.
-- **Acceptance Criteria**:
-    1. Script extracts JSON block from `staging-workflow.md` using `jq`.
-    2. Script iterates through all `.md` files in `01-STAGING`.
-    3. Script extracts YAML frontmatter from each file.
-    4. Debug output shows: File Name, Extracted Type, and Matched Config Rule.
+### Journey 2: The Incomplete Note (Edge Case / Recovery)
 
-#### Story 1.4: Validation Logic Implementation
-- **As a** Developer,
-- **I want** the script to validate notes against the loaded configuration rules,
-- **so that** I can correctly distinguish between "Valid" and "Invalid" notes.
-- **Acceptance Criteria**:
-    1. Implement "Type" existence check.
-    2. Implement "Fields" existence check (empty string rule).
-    3. Implement "Snippet" validation using `eval` (string rule).
-    4. Log validation results (Pass/Fail + Reason) to stdout (or log file).
+**Alex** drags a half-formed note from `00-INBOX/` to `01-STAGING/` and runs `stage.sh`. The script detects the note is missing its `ID` field—a required validation per the config. Instead of failing silently or breaking, the script moves the note to `02-REFACTORING/` and injects a callout right after the YAML frontmatter: `> [!WARNING] Validation Failed: Required field 'ID' is missing`. Alex opens the note in Obsidian, fills in the ID, moves it back to `01-STAGING/`, and re-runs. This time it processes successfully to `03-ZETTELKASTEN/Thoughts/`.
 
-#### Story 1.5: File Operations (Move & Refactor)
-- **As a** User,
-- **I want** the script to actually move the files to their destinations or the refactoring folder,
-- **so that** the staging process is automated.
-- **Acceptance Criteria**:
-    1. **Valid Notes**: Moved to `destination` defined in config.
-    2. **Collisions**: If destination exists, treat as error -> move to Refactoring.
-    3. **Invalid Notes**: Moved to `02-REFACTORING`.
-    4. **Error Injection**: Append `> [!WARNING] {Reason}` to invalid notes using safe `sed` alternative (temp file + mv).
-    5. **Integrity**: Original file content (users notes) remains 100% intact (minus the appended error).
+**Emotional Arc:** Attempt → Error → Clarity → Fix → Success
 
-#### Story 1.6: User Documentation
-- **As a** User,
-- **I want** clear documentation on how to write the JSON config and validation snippets,
-- **so that** I can expand the system later without reading the shell script source code.
-- **Acceptance Criteria**:
-    1. `docs/staging-workflow-guide.md` created.
-    2. Explains JSON structure.
-    3. Provides examples of common validation snippets (e.g., date checks, regex).
-    4. Explains how to set up the symlinks for a fresh install.
+**Critical Moment:** The error callout appears in the exact place Alex needs to see it—no log diving required.
 
+### Journey 3: The Media Organizer (Complex Routing)
+
+**Alex** finished reading a book and creates a note with Type: `Media-Books`. They move it to `01-STAGING/` and run `stage.sh`. The config recognizes this type maps to `03-ZETTELKASTEN/Media/Books/` with additional required fields (Author, Rating). All validations pass, and the note lands in the correct folder. Alex can now browse their book notes alongside Anime, Films, and Games in the Media section.
+
+**Emotional Arc:** Completion → Validation → Proper Placement
+
+**Critical Moment:** The complex folder hierarchy (Media → Books → Tomes/Chapters/Quotes) is navigated automatically based on Type and Fields.
+
+### Journey 4: The Infrastructure Developer (Maintenance/Extension)
+
+**Alex** wants to add a new category: "Podcasts" under Media. They open `config/staging-workflow.md` in Obsidian, add the new type definition with destination `03-ZETTELKASTEN/Media/Podcasts/`, and save. They run the test suite: `sh infrastructure/tests/test-*.sh`. All tests pass, including a new validation test for the Podcast type. Alex runs `stage.sh` on a test note—it routes correctly. The foundation is solid.
+
+**Emotional Arc:** Intent → Configuration → Verification → Confidence
+
+**Critical Moment:** Tests pass, proving the refactor delivered testability and the config change didn't break existing types.
+
+### Journey Requirements Summary
+
+| Journey | Reveals Requirements |
+|:---|:---|
+| Daily Capture | iOS Shortcut → INBOX → manual staging → automated routing |
+| Incomplete Note | Validation rules, error callout injection, REFACTORING folder workflow |
+| Media Organizer | Complex nested folder routing, type-specific field validation |
+| Infrastructure Developer | JSON configuration format, testability, extensible type system |
+
+## CLI Tool Specific Requirements
+
+### Project-Type Overview
+
+This is a POSIX-compliant shell-based CLI toolset designed for silent, scriptable operation within an Obsidian vault context. The tools prioritize Unix philosophy principles: do one thing well, expect silent success, and provide clear errors on failure.
+
+### Technical Architecture Considerations
+
+- **POSIX Compliance:** Must execute without errors on both Linux `sh` (dash/bash) and iOS `a-shell` environments
+- **Silent Operation:** Scripts produce no output on success; file creation/movement is the only side effect
+- **Exit Codes:** Proper exit codes (0 = success, non-zero = failure) enable script chaining and automation
+- **Logging:** Optional verbose mode (`-v` or `--verbose`) for debugging, silent by default
+- **Error Handling:** Fail fast with clear error messages to stderr when operations fail
+- **Path Resolution:** All paths resolved relative to script location; support for optional `VAULT_ROOT` environment variable override
+
+### Implementation Considerations
+
+- **Argument Parsing:** Simple positional arguments or basic flags (`--dry-run`, `--verbose`)
+- **Config Loading:** Read `../config/staging-workflow.md` relative to script location in `infrastructure/bin/`
+- **Atomic Operations:** File moves use atomic patterns where possible (critical for iOS sync scenarios)
+- **Cross-Platform Compatibility:** Avoid GNU-specific features; use POSIX-compliant alternatives (e.g., `sed` without `-i`)
+
+### Out of Scope
+
+- Interactive prompts and TUI features
+- Shell tab-completion
+- Complex output formatting (JSON/Markdown output to stdout)
+- Environment variable configuration overrides
+- Daemon/long-running processes
+
+## Project Scoping & Phased Development
+
+### MVP Strategy & Philosophy
+
+**MVP Approach:** Foundation-First Refactor — Deliver a robust, testable infrastructure that eliminates existing bugs and establishes clear structural boundaries. The MVP is complete when the system is demonstrably more reliable than the legacy version and provides a stable base for future enhancements.
+
+**Resource Requirements:** Single developer (you) with shell scripting experience; no external dependencies beyond `jq` availability.
+
+### MVP Feature Set (Phase 1)
+
+**Core User Journeys Supported:**
+- Daily Capture (iOS → INBOX → Zettelkasten routing)
+- Incomplete Note handling (validation failure → REFACTORING with error callouts)
+- Infrastructure Developer workflow (test-driven configuration changes)
+
+**Must-Have Capabilities:**
+- Directory structure: `infrastructure/bin/`, `config/`, `templates/`, `tests/`
+- All scripts moved and executable with updated relative paths
+- Configuration migrated from `type_to_folder.md` to `config/staging-workflow.md` (JSON-in-Markdown)
+- Persistent content bug fixed via `env -i` environment isolation
+- Underscore sanitization implemented (`NAME="${NAME%_}"`)
+- Full test suite passing (`infrastructure/tests/*.sh`)
+- POSIX compliance verified on both Linux/WSL and iOS (a-shell)
+
+### Post-MVP Features
+
+**Phase 2 (Growth):**
+- Additional field validation rules beyond ID presence (e.g., date formats, regex patterns)
+- Enhanced dry-run mode with diff output showing what would change
+- Support for additional template types beyond ST-default and ST-task
+
+**Phase 3 (Expansion):**
+- Plugin architecture for custom validators
+- Automatic backup before file moves
+- Cross-vault synchronization capabilities
+
+### Risk Mitigation Strategy
+
+**Technical Risks:**
+- **`env -i` Cross-Platform Behavior:** The environment isolation fix must be tested thoroughly on both Linux and iOS a-shell before considering Phase 1 complete. Risk mitigation: Include specific regression tests that verify no variable leakage occurs between script invocations.
+
+**Resource Risks:**
+- **Single Developer Bandwidth:** If time constraints emerge, the scope is already minimal—no deferrable features remain. The phased approach in `refactor_todo.md` provides natural stopping points if needed.
+
+**Compatibility Risks:**
+- **`jq` Version Differences:** Ensure JSON parsing works consistently across the jq versions available on Linux (typically 1.6+) and iOS a-shell. Mitigation: Use basic jq filters only, avoid advanced features.
+
+## Functional Requirements
+
+### Directory Structure & Organization
+
+- FR1: System maintains executable scripts in `infrastructure/bin/` directory
+- FR2: System maintains configuration files in `infrastructure/config/` directory
+- FR3: System maintains templates in `infrastructure/templates/` directory
+- FR4: System maintains test files in `infrastructure/tests/` directory
+- FR5: Scripts execute from `infrastructure/bin/` with relative paths to sibling directories
+
+### Configuration Management
+
+- FR6: System reads routing configuration from `infrastructure/config/staging-workflow.md`
+- FR7: System parses JSON configuration embedded within Markdown files
+- FR8: System supports configurable note type definitions with destination folders
+- FR9: System supports configurable field validation rules per note type
+- FR10: Configuration changes take effect on next script execution (stateless reload)
+
+### Note Processing & Routing
+
+- FR11: System processes all files in `01-STAGING/` directory
+- FR12: System extracts YAML frontmatter from Markdown files
+- FR13: System routes validated notes to configured destinations in `03-ZETTELKASTEN/`
+- FR14: System supports nested folder destinations (e.g., `Media/Books/Tomes/`)
+- FR15: System treats filename collisions as validation failures
+
+### Validation & Error Handling
+
+- FR16: System validates presence of required fields per note type configuration
+- FR17: System validates presence of "Type" field in note frontmatter
+- FR18: System validates field values using configurable shell snippet rules
+- FR19: System moves invalid notes to `02-REFACTORING/` directory
+- FR20: System injects error callouts into invalid notes immediately after YAML frontmatter
+- FR21: System preserves original note content except for injected error callouts
+
+### Cross-Platform Execution
+
+- FR22: System executes on Linux/WSL using POSIX `sh`
+- FR23: System executes on iOS `a-shell` using POSIX `sh`
+- FR24: System avoids GNU-specific shell features (e.g., `sed -i`, `[[ ]]`, arrays)
+- FR25: System handles filenames with spaces correctly
+- FR26: System isolates script environment to prevent variable leakage between invocations
+
+### Testing & Quality Assurance
+
+- FR27: System includes test suite executable via `infrastructure/tests/*.sh`
+- FR28: System supports dry-run mode showing intended actions without file modifications
+- FR29: System generates test data for validation of staging workflows
+- FR30: System exits with non-zero status on failure for script chaining
+
+
+## Non-Functional Requirements
+
+### Performance
+
+- **NFR-P1:** Script execution completes within 2 seconds for batches of 10 notes on iPhone (a-shell environment)
+- **NFR-P2:** Template generation completes within 500ms for single note creation
+- **NFR-P3:** Configuration loading overhead is negligible (<100ms) for typical config sizes
+
+### Reliability
+
+- **NFR-R1:** Scripts produce identical results on Linux `sh` and iOS `a-shell` for identical inputs
+- **NFR-R2:** Failed script execution leaves filesystem in consistent state (no partial file moves)
+- **NFR-R3:** Test suite passes 100% of runs on both target platforms
+
+### Maintainability
+
+- **NFR-M1:** All scripts pass shellcheck linting with zero warnings
+- **NFR-M2:** New note types can be added via configuration change only (no script modification)
+- **NFR-M3:** All functions include inline comments explaining complex logic (e.g., `sed`, `jq` operations)
+
+### Integration
+
+- **NFR-I1:** Scripts function correctly with Obsidian's file watching (atomic moves where possible)
+- **NFR-I2:** Configuration file format is valid Markdown that renders correctly in Obsidian
+- **NFR-I3:** Scripts exit with standard codes (0=success, 1=general error, 2=validation failure) for iOS Shortcuts integration
 

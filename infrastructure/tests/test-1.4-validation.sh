@@ -8,14 +8,14 @@ rm -rf "$VAULT_ROOT"
 mkdir -p "$VAULT_ROOT"
 
 # Use generate_test_data.sh to seed
-sh scripts/generate_test_data.sh --target "$VAULT_ROOT"
+sh infrastructure/bin/generate_test_data.sh --target "$VAULT_ROOT"
 
 # Add custom failure cases
-# Case 1: Missing ID
+# Case 1: Missing id
 cat <<EOF > "$VAULT_ROOT/01-STAGING/missing-id.md"
 ---
 Type: Idea
-Topic: No ID
+topic: No id
 ---
 Content
 EOF
@@ -24,8 +24,8 @@ EOF
 cat <<EOF > "$VAULT_ROOT/01-STAGING/empty-topic.md"
 ---
 Type: Idea
-ID: 12345
-Topic: 
+id: 12345
+topic: 
 ---
 Content
 EOF
@@ -34,15 +34,15 @@ EOF
 cat <<EOF > "$VAULT_ROOT/01-STAGING/inactive-note.md"
 ---
 Type: Note
-ID: 12346
-Status: Inactive
+id: 12346
+status: Inactive
 ---
 Content
 EOF
 
 # Run stage.sh
 export VAULT_ROOT
-sh scripts/stage.sh > /dev/null
+sh infrastructure/bin/stage.sh > /dev/null
 
 # Verify logs
 LOG_FILE="$VAULT_ROOT/99-SYSTEM/logs/staging_logs.md"
@@ -66,9 +66,9 @@ check_log "Processing valid-idea.md: [PASS]"
 check_log "Processing valid-note.md: [PASS]"
 
 # Negative cases
-check_log "Processing missing-id.md: [FAIL] Missing mandatory field: ID"
-check_log "Processing empty-topic.md: [FAIL] Missing or empty required field: Topic"
-check_log "Processing inactive-note.md: [FAIL] Validation snippet failed for Status: [ \"\$Status\" = \"Active\" ]"
+check_log "Processing missing-id.md: [FAIL] Missing mandatory field: id"
+check_log "Processing empty-topic.md: [FAIL] Missing or empty required field: topic"
+check_log "Processing inactive-note.md: [FAIL] Validation snippet failed for status: [ \"\$status\" = \"Active\" ]"
 
 echo "All Story 1.4 tests passed."
 rm -rf "$VAULT_ROOT"

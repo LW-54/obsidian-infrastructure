@@ -21,7 +21,7 @@ set -e
 # Constants & Configuration
 # ------------------------------------------------------------------------------
 LOG_FILE_REL="99-SYSTEM/logs/staging_logs.md"
-CONFIG_FILE_REL="99-SYSTEM/infrastructure/staging-workflow.md"
+CONFIG_FILE_REL="infrastructure/config/staging-workflow.md"
 STAGING_DIR_REL="01-STAGING"
 DRY_RUN=0
 
@@ -34,7 +34,7 @@ if [ -z "$VAULT_ROOT" ]; then
     # Vault root is .../infrastructure/scripts/../../
     # Note: We use logical directory traversal for simplicity, assuming standard structure.
     # In a real environment, readlink -f might be safer but less portable to non-GNU.
-    VAULT_ROOT="$SCRIPT_DIR/../../.."
+    VAULT_ROOT="$SCRIPT_DIR/../.."
 fi
 
 # ------------------------------------------------------------------------------
@@ -111,10 +111,10 @@ validate_note() {
     _vn_metadata="$1"
     _vn_fields="$2"
 
-    # 1. Mandatory ID Check
-    _vn_id=$(printf "%s" "$_vn_metadata" | jq -r '.ID // empty')
+    # 1. Mandatory id Check
+    _vn_id=$(printf "%s" "$_vn_metadata" | jq -r '.id // empty')
     if [ -z "$_vn_id" ]; then
-        printf "Missing mandatory field: ID\n"
+        printf "Missing mandatory field: id\n"
     fi
 
     # 2. Field Validation Loop
